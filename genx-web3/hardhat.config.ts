@@ -1,22 +1,23 @@
-require("@nomicfoundation/hardhat-toolbox");
+import { HardhatUserConfig } from "hardhat/config";
+import "@nomicfoundation/hardhat-toolbox";
+import * as dotenv from "dotenv";
 
-module.exports = {
-  solidity: "0.8.28", // Specify Solidity version
+dotenv.config(); // Load environment variables from .env file
+
+const config: HardhatUserConfig = {
+  solidity: "0.8.28",
   networks: {
-    hardhat: {}, // Default local network
-    Amoy: { // Polygon Mumbai Testnet
-      url: "https://rpc-amoy.polygon.technology", // RPC URL for Mumbai
-      accounts: ["YOUR_PRIVATE_KEY"], // Replace with your wallet private key
-    },
-    polygonMainnet: { // Polygon Mainnet
-      url: "https://rpc-mainnet.maticvigil.com", // RPC URL for Mainnet
-      accounts: ["93c1718e7026ee1bca39ab34ef3927b91bae858c5d7ba41526a372b56fa08196"], // Replace with your wallet private key
-    },
+    polygonAmoy: {
+      url: process.env.POLYGON_AMOY_RPC_URL || "",
+      accounts: [process.env.ACCOUNT_PRIVATE_KEY || ""],
+      chainId: 80002
+    }
   },
   etherscan: {
     apiKey: {
-      Amoy: "JT9K486S4C6FY1E6W57RG5PH4I7PTPYPEV", // Replace with your Polygonscan API key for Mumbai
-      polygon: "JT9K486S4C6FY1E6W57RG5PH4I7PTPYPEV", // Replace with your Polygonscan API key for Mainnet
+      polygonAmoy: process.env.POLYGONSCAN_API_KEY || ""
     },
-  },
+  }
 };
+
+export default config;
