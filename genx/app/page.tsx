@@ -1,101 +1,108 @@
-import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Navbar } from "@/components/Navbar";
+import { Features } from "@/components/sections/features";
+import { Card, CardContent } from "@/components/ui/card"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
+
+
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const featuredNFTs = [
+    {
+      imageUrl: "https://img.freepik.com/free-photo/abstract-textured-backgound_1258-30633.jpg",
+      title: "Cosmic Dreams #001",
+      price: "0.85"
+    },
+    {
+      imageUrl: "https://img.freepik.com/free-photo/abstract-textured-backgound_1258-30633.jpg",
+      title: "Cosmic Dreams #001",
+      price: "0.85"
+    },
+    {
+      imageUrl: "https://img.freepik.com/free-photo/abstract-textured-backgound_1258-30633.jpg",
+      title: "Cosmic Dreams #001",
+      price: "0.85"
+    },
+    {
+      imageUrl: "https://img.freepik.com/free-photo/abstract-textured-backgound_1258-30633.jpg",
+      title: "Cosmic Dreams #001",
+      price: "0.85"
+    },
+    {
+      imageUrl: "https://img.freepik.com/free-photo/abstract-textured-backgound_1258-30633.jpg",
+      title: "Cosmic Dreams #001",
+      price: "0.85"
+    },
+    {
+      imageUrl: "https://img.freepik.com/free-photo/abstract-textured-backgound_1258-30633.jpg",
+      title: "Cosmic Dreams #001",
+      price: "0.85"
+    },
+    
+    
+  ];
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
+      <Navbar />
+      
+      {/* Hero Section */}
+      <section className="py-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              AI-Generated NFT Marketplace
+            </h1>
+            <p className="text-xl text-muted-foreground mb-8">
+              Create unique, AI-generated artwork and mint it as NFTs instantly
+            </p>
+            <Button className="bg-gradient-to-r px-6 py-8 text-xl font-semibold from-purple-600 to-pink-600">
+              Start Creating
+            </Button>
+          </div>
+
+          {/* Featured NFTs */}
+         
+            <div className="w-full flex justify-center items-center">
+              <Carousel
+                opts={{
+                  align: "start",
+                }}
+                className="w-full max-w-2xl"
+              >
+                <CarouselContent>
+                  {featuredNFTs.map((nft, index) => (
+                    <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                      <div className="p-1">
+                        <Card>
+                          <CardContent className="flex flex-col items-center justify-center p-4">
+                            <img className="rounded-lg w-40 h-40" src={nft.imageUrl}/>
+                            <span className="text-sm font-semibold">{nft.title}</span>
+                            <span>{nft.price} ETH</span>
+                            <Button className=" font-semibold w-full mt-3">Check Out</Button>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
+              
+            </div>    
+          </div>
+    
+      </section>
+
+      {/* Features Section */}
+      <Features />
     </div>
   );
 }
