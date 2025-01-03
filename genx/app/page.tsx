@@ -83,8 +83,8 @@ export default function Home() {
                         <Card>
                           <CardContent className="flex flex-col items-center justify-center p-4">
                             <img className="rounded-lg w-40 h-40" src={nft.imageUrl}/>
-                            <span className="text-sm font-semibold">{nft.title}</span>
-                            <span>{nft.price} ETH</span>
+                            <span className="text-md font-semibold mt-2">{nft.title}</span>
+                            <span className="text-xs">{nft.price} ETH</span>
                             <Button className=" font-semibold w-full mt-3">Check Out</Button>
                           </CardContent>
                         </Card>
