@@ -1,5 +1,5 @@
 const Generate = () => {
-    return ( <div>generate page</div> );
+    return ( <div></div> );
 }
  
 export default Generate;

@@ -15,7 +15,9 @@ export function Navbar() {
               Gen<span className="jump-twice text-4xl font-bold text-white relative top-[3px]">X</span>
             </Link>
           </div>
-          <div className="button-container">
+          
+          <div className="flex gap-8 justify-center items-center">
+          <Link href={"/explore"} className="text-xl text-pink-500 hover:underline font-semibold">Explore</Link>
           <Button variant="outline" className="flex items-center gap-2 hover:scale-105 hover:translate-y-[-2px] text-pink-500 border-pink-200 transition-all border-2 hover:border-white hover:shadow-xl hover:text-white hover:shadow-border  hover:bg-pink-700 hover:bg-opacity-30">
             <Wallet className="h-4 w-4" />
             Connect Wallet

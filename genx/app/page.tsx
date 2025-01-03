@@ -52,7 +52,6 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
       <Navbar />
       
-      {/* Hero Section */}
       <section className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
@@ -62,12 +61,11 @@ export default function Home() {
             <p className="text-xl text-muted-foreground mb-8">
               Create unique, AI-generated artwork and mint it as NFTs instantly
             </p>
-            <Button className="bg-gradient-to-r px-6 py-8 text-xl font-semibold from-purple-600 to-pink-600">
+            <Button className="bg-gradient-to-r px-4 py-6 text-xl font-semibold from-purple-600 to-pink-600 hover:text-white hover:scale-105 hover:translate-y-[-5px] hover:border-[1px] hover:border-white hover:shadow-lg hover:shadow-border transition-all">
               Start Creating
             </Button>
           </div>
 
-          {/* Featured NFTs */}
          
             <div className="w-full flex justify-center items-center">
               <Carousel

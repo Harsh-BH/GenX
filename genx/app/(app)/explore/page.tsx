@@ -25,7 +25,7 @@ const ExploreNFTs = () => {
       title: "Neon Vibes #101",
       price: "0.5 ETH",
     },
-    // Add more NFTs as needed
+    
   ]);
 
 
