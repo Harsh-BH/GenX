@@ -9,6 +9,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
+import Link from "next/link";
 
 
 
@@ -61,9 +62,9 @@ export default function Home() {
             <p className="text-xl text-muted-foreground mb-8">
               Create unique, AI-generated artwork and mint it as NFTs instantly
             </p>
-            <Button className="bg-gradient-to-r px-4 py-6 text-xl font-semibold from-purple-600 to-pink-600 hover:text-white hover:scale-105 hover:translate-y-[-5px] hover:border-[1px] hover:border-white hover:shadow-lg hover:shadow-border transition-all">
+            <Link href={"/generate"} className="bg-gradient-to-r rounded-lg px-3 py-4 text-xl font-semibold from-purple-600 to-pink-600 hover:text-white hover:scale-105 hover:translate-y-[-5px] hover:border-[2px] hover:border-white hover:shadow-lg hover:shadow-border transition-all">
               Start Creating
-            </Button>
+            </Link>
           </div>
 
          

@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
 import NFTCard from "@/components/NFTCard/card";
+import axios from "axios";
 
 const ExploreNFTs = () => {
   const [nfts, setNfts] = useState([
@@ -28,10 +29,15 @@ const ExploreNFTs = () => {
     
   ]);
 
+  const [page, setPage] = useState(1)
+
+  const fetchNFTs = async() => {
+    const response = await axios.get("/api/getNfts")
+    
+  }
 
   return (
     <div className="min-h-screen ">
-      {/* Header */}
       <Navbar/>
 
 
@@ -44,8 +50,8 @@ const ExploreNFTs = () => {
 
       {/* Pagination */}
       <div className="max-w-7xl mx-auto px-4 mt-6 flex justify-center">
-        <Button className="mx-2">Previous</Button>
-        <Button className="mx-2">Next</Button>
+        <Button className="mx-2" onClick={() => setPage((prev) => prev-1)}>Previous</Button>
+        <Button className="mx-2" onClick={() => setPage((prev) => prev+1)}>Next</Button>
       </div>
     </div>
   );
