@@ -2,6 +2,9 @@
 
 import { Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+
+
 
 export function Navbar() {
   return (
@@ -13,10 +16,7 @@ export function Navbar() {
               GenX
             </h1>
           </div>
-          <Button variant="outline" className="flex items-center gap-2">
-            <Wallet className="h-4 w-4" />
-            Connect Wallet
-          </Button>
+          <ConnectButton label="Sign in"  />
         </div>
       </div>
     </nav>
