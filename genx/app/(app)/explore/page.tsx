@@ -5,6 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
 import NFTCard from "@/components/NFTCard/card";
 import axios from "axios";
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from "@/components/ui/pagination"
+
+  
 
 const ExploreNFTs = () => {
   const [nfts, setNfts] = useState([
@@ -49,10 +60,25 @@ const ExploreNFTs = () => {
       </main>
 
       {/* Pagination */}
-      <div className="max-w-7xl mx-auto px-4 mt-6 flex justify-center">
-        <Button className="mx-2" onClick={() => setPage((prev) => prev-1)}>Previous</Button>
-        <Button className="mx-2" onClick={() => setPage((prev) => prev+1)}>Next</Button>
-      </div>
+        <Pagination className="mt-4">
+            <PaginationContent>
+                <PaginationItem>
+                <PaginationPrevious href="#" />
+                </PaginationItem>
+                <PaginationItem>
+                <PaginationLink href="#">1</PaginationLink>
+                <PaginationLink href="#">2</PaginationLink>
+                <PaginationLink href="#">3</PaginationLink>
+                </PaginationItem>
+                <PaginationItem>
+                <PaginationEllipsis />
+                </PaginationItem>
+                <PaginationItem>
+                <PaginationNext href="#" />
+                </PaginationItem>
+            </PaginationContent>
+        </Pagination>
+
     </div>
   );
 };
