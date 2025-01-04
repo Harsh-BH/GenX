@@ -3,23 +3,28 @@ import re
 from nltk.corpus import wordnet
 
 def preprocess_prompt(prompt):
-   
+    print("preprocess_prompt is called")
+
     # Step 1: Text Cleaning
     prompt = clean_text(prompt)
+    print("1done")
 
     # Step 2: Spell Checking
     prompt = correct_spelling(prompt)
+    print("2done")
 
-    # Step 3: Synonym Replacement
-    prompt = replace_synonyms(prompt)
+    # # Step 3: Synonym Replacement
+    # prompt = replace_synonyms(prompt)
+    # print("3done")
 
-    # Step 4: Keyword Highlighting
-    prompt = highlight_keywords(prompt)
+    # # Step 4: Keyword Highlighting
+    # prompt = highlight_keywords(prompt)
+    # print("4done")
 
     return prompt
 
 def clean_text(prompt):
-    
+
     # Remove special characters
     prompt = re.sub(r'[^a-zA-Z0-9\s]', '', prompt)
     # Remove extra spaces
@@ -28,14 +33,14 @@ def clean_text(prompt):
     return prompt.lower()
 
 def correct_spelling(prompt):
-   
+
     spell = SpellChecker()
     words = prompt.split()
     corrected_words = [spell.correction(word) if word in spell.unknown(words) else word for word in words]
     return ' '.join(corrected_words)
 
 def replace_synonyms(prompt):
-    
+
     words = prompt.split()
     replaced_words = []
 
@@ -52,7 +57,7 @@ def replace_synonyms(prompt):
     return ' '.join(replaced_words)
 
 def highlight_keywords(prompt):
-    
+
     # Define a list of keywords to highlight
     keywords = {'astronaut', 'horse', 'moon', 'space'}
     words = prompt.split()

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test FastAPI App</title>
+</head>
+<body>
+    <h1>FastAPI Testing</h1>
+
+    <!-- Form for Text-to-Image Generation -->
+    <h2>Text-to-Image</h2>
+    <form id="textToImageForm" action="http://localhost:8000/generate-image" method="POST">
+        <label for="prompt">Enter Prompt:</label><br>
+        <textarea id="prompt" name="prompt" rows="4" cols="50" required></textarea><br><br>
+        <button type="submit">Generate Image</button>
+    </form>
+    <br>
+    <div id="textToImageResult"></div>
+
+    <!-- Form for Image-to-Text Conversion -->
+    <h2>Image-to-Text</h2>
+    <form id="imageToTextForm" action="http://localhost:8000/image-to-text" method="POST" enctype="multipart/form-data">
+        <label for="image">Upload Image:</label><br>
+        <input type="file" id="image" name="image" accept="image/*" required><br><br>
+        <button type="submit">Convert to Text</button>
+    </form>
+    <br>
+    <div id="imageToTextResult"></div>
+
+    <script>
+        const textToImageForm = document.getElementById('textToImageForm');
+        textToImageForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const formData = new FormData(textToImageForm);
+
+            const response = await fetch(textToImageForm.action, {
+                method: textToImageForm.method,
+                body: new URLSearchParams(formData)
+            });
+
+            const result = await response.json();
+            document.getElementById('textToImageResult').innerHTML = `
+                <h3>Generated Image</h3>
+                <img src="${result.image_url}" alt="Generated Image" style="max-width: 400px;">
+            `;
+        });
+
+        const imageToTextForm = document.getElementById('imageToTextForm');
+        imageToTextForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const formData = new FormData(imageToTextForm);
+
+            const response = await fetch(imageToTextForm.action, {
+                method: imageToTextForm.method,
+                body: formData
+            });
+
+            const result = await response.json();
+            document.getElementById('imageToTextResult').innerHTML = `
+                <h3>Extracted Text</h3>
+                <p>${result.text}</p>
+            `;
+        });
+    </script>
+</body>
+</html>

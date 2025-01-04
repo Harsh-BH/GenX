@@ -1,4 +1,8 @@
-Flask
-Pillow==9.4.0
-requests==2.31.0
-huggingface_hub==0.15.1
+fastapi
+uvicorn
+requests
+huggingface_hub
+nltk
+pyspellchecker
+Pillow
+python-multipart
