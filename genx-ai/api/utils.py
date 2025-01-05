@@ -1,22 +1,34 @@
 import os
 from PIL import Image
-import requests
-from io import BytesIO
 import uuid
+import logging
 
 def save_image(image):
-    # Generate a unique filename using UUID
-    unique_filename = f"{uuid.uuid4().hex}.png"
+    try:
+        print("save image is called")
 
-    # Define the path to the 'generated_images' folder within the 'static' directory
-    image_path = os.path.join("static", "temp", unique_filename)
+        # Since Dockerfile is in genx-ai, use that as base
+        temp_dir = "/app/static/temp"  # Changed from /app/genx-ai/static/temp
+        print(f"Temp directory path: {temp_dir}")
 
-    # Ensure the 'generated_images' directory exists
-    os.makedirs(os.path.dirname(image_path), exist_ok=True)
+        # Generate a unique filename
+        unique_filename = f"{uuid.uuid4().hex}.png"
 
-    # Save the PIL image to the specified path
-    image.save(image_path)
+        # Create the full path for the image
+        image_path = os.path.join(temp_dir, unique_filename)
+        print(f"Attempting to save to: {image_path}")
 
-    # Return the relative path for accessing the image via the FastAPI static files mount
-    return f"/static/generated_images/{unique_filename}"
+        # Ensure the directory exists with proper permissions
+        os.makedirs(temp_dir, mode=0o777, exist_ok=True)
 
+        # Save the image
+        image.save(image_path, format='PNG')
+        print(f"Image saved successfully at: {image_path}")
+
+        # Return the relative path for static file serving
+        return f"/static/temp/{unique_filename}"
+
+    except Exception as e:
+        print(f"Error details: {str(e)}")
+        logging.error(f"Error saving image: {str(e)}")
+        raise

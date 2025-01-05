@@ -6,3 +6,4 @@ nltk
 pyspellchecker
 Pillow
 python-multipart
+opencv-python
