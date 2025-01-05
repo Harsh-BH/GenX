@@ -9,7 +9,7 @@ def save_image(image):
     unique_filename = f"{uuid.uuid4().hex}.png"
 
     # Define the path to the 'generated_images' folder within the 'static' directory
-    image_path = os.path.join("static", "generated_images", unique_filename)
+    image_path = os.path.join("static", "temp", unique_filename)
 
     # Ensure the 'generated_images' directory exists
     os.makedirs(os.path.dirname(image_path), exist_ok=True)
