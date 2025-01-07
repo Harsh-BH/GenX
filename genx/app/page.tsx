@@ -9,6 +9,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
+import Link from "next/link";
 
 
 
@@ -52,7 +53,6 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
       <Navbar />
       
-      {/* Hero Section */}
       <section className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
@@ -62,12 +62,11 @@ export default function Home() {
             <p className="text-xl text-muted-foreground mb-8">
               Create unique, AI-generated artwork and mint it as NFTs instantly
             </p>
-            <Button className="bg-gradient-to-r px-6 py-8 text-xl font-semibold from-purple-600 to-pink-600">
+            <Link href={"/generate"} className="bg-gradient-to-r rounded-lg px-3 py-4 text-xl font-semibold from-purple-600 to-pink-600 hover:text-white hover:scale-105 hover:translate-y-[-5px] hover:border-[2px] hover:border-white hover:shadow-lg hover:shadow-border transition-all">
               Start Creating
-            </Button>
+            </Link>
           </div>
 
-          {/* Featured NFTs */}
          
             <div className="w-full flex justify-center items-center">
               <Carousel
@@ -83,8 +82,8 @@ export default function Home() {
                         <Card>
                           <CardContent className="flex flex-col items-center justify-center p-4">
                             <img className="rounded-lg w-40 h-40" src={nft.imageUrl}/>
-                            <span className="text-sm font-semibold">{nft.title}</span>
-                            <span>{nft.price} ETH</span>
+                            <span className="text-md font-semibold mt-2">{nft.title}</span>
+                            <span className="text-xs">{nft.price} ETH</span>
                             <Button className=" font-semibold w-full mt-3">Check Out</Button>
                           </CardContent>
                         </Card>
