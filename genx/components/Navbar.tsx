@@ -1,8 +1,6 @@
 "use client";
-
-import { Link, Wallet } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { ConnectButton } from '@rainbow-me/rainbowkit';
+import Link from "next/link";
 
 
 
@@ -14,7 +12,9 @@ export function Navbar() {
         <div className="flex justify-between items-center h-[80px]">
           <div className="flex items-center">
             <Link href={"/"} className="text-3xl font-bold absolute bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Gen<span className="jump-twice text-4xl font-bold text-white relative top-[3px]">X</span>
+              Gen
+              <span className="jump-twice text-4xl font-bold text-white relative top-[3px]"
+              >X</span>
             </Link>
           </div>
           <ConnectButton label="Sign in"  />

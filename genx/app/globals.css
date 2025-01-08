@@ -103,9 +103,9 @@ body {
 
 .jump-twice {
   display: inline-block;
-  animation: jump-twice 7s infinite;
-  
-  
+  animation: jump-twice 4s infinite;
+  transform: translateY(0); /* Match server initial state */
+  text-shadow: none; /* Match server initial state */
 }
 
 
