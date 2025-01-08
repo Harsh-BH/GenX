@@ -1,58 +1,81 @@
-
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
+import FormData from 'form-data';
+
+// Log initialization for debugging
+console.log("Initializing uploadImage API");
 
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: '10mb',
+      sizeLimit: '10mb', // Allow larger payloads for image uploads
     },
   },
 };
 
-async function uploadToPinata(fileData: string) {
+// Helper function to validate Pinata credentials
+function getPinataCredentials() {
+  console.log("hello")
   const pinataApiKey = process.env.PINATA_API_KEY;
   const pinataSecretKey = process.env.PINATA_SECRET_KEY;
 
   if (!pinataApiKey || !pinataSecretKey) {
-    throw new Error('Pinata credentials not configured');
+    console.error('Pinata API credentials are missing');
+    throw new Error('Pinata API credentials are not configured in environment variables');
   }
 
-  // Remove data:image/[type];base64, from the string
-  const base64Data = fileData.split(',')[1];
-  const buffer = Buffer.from(base64Data, 'base64');
+  return { pinataApiKey, pinataSecretKey };
+}
 
-  const formData = new FormData();
-  const blob = new Blob([buffer]);
-  formData.append('file', blob, 'image.jpg');
+// Function to upload image to Pinata
+async function uploadToPinata(fileData: string) {
+  console.log("Uploading image to Pinata...");
+
+  const { pinataApiKey, pinataSecretKey } = getPinataCredentials();
 
   try {
+    // Extract the base64 content from the data URI
+    const base64Data = fileData.split(',')[1];
+    const buffer = Buffer.from(base64Data, 'base64');
+    const blob = new Blob([buffer], { type: 'image/jpeg' });
+
+
+    // Create a FormData object with the image file
+      const formData = new FormData();
+      formData.append('file', blob, 'image.jpg');
+
+    // Send the request to Pinata
     const response = await axios.post('https://api.pinata.cloud/pinning/pinFileToIPFS', formData, {
       headers: {
         'pinata_api_key': pinataApiKey,
         'pinata_secret_api_key': pinataSecretKey,
+        ...formData.getHeaders(),
       },
     });
 
+    console.log("Image uploaded successfully:", response.data.IpfsHash);
     return response.data.IpfsHash;
   } catch (error) {
-    console.error('Error uploading to Pinata:', error);
-    throw new Error('Failed to upload to Pinata');
+    console.error("Error uploading image to Pinata:", error);
+    throw new Error('Failed to upload image to Pinata');
   }
 }
 
+// Function to create metadata and upload to Pinata
 async function createMetadata(imageUri: string) {
-  const pinataApiKey = process.env.PINATA_API_KEY;
-  const pinataSecretKey = process.env.PINATA_SECRET_KEY;
+  console.log("Uploading metadata to Pinata...");
+
+  const { pinataApiKey, pinataSecretKey } = getPinataCredentials();
 
   const metadata = {
     name: 'My NFT',
     description: 'NFT Description',
     image: imageUri,
-    attributes: [],
+    attributes: [], // Add NFT-specific attributes if required
   };
 
   try {
+    // Send the metadata to Pinata
     const response = await axios.post(
       'https://api.pinata.cloud/pinning/pinJSONToIPFS',
       metadata,
@@ -65,45 +88,51 @@ async function createMetadata(imageUri: string) {
       }
     );
 
+    console.log("Metadata uploaded successfully:", response.data.IpfsHash);
     return response.data.IpfsHash;
   } catch (error) {
-    console.error('Error uploading metadata:', error);
-    throw new Error('Failed to upload metadata');
+    console.error("Error uploading metadata to Pinata:", error);
+    throw new Error('Failed to upload metadata to Pinata');
   }
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
-  }
+// POST handler
+export async function POST(req: NextRequest) {
+  console.log("Handling POST request");
 
   try {
-    const { fileData } = req.body;
+    const body = await req.json();
+    const { fileData } = body;
 
     if (!fileData) {
-      return res.status(400).json({ message: 'No file data provided' });
+      return NextResponse.json({ message: 'No file data provided' }, { status: 400 });
     }
 
-    // Upload image to Pinata
+    // Upload the image and get its IPFS hash
     const imageHash = await uploadToPinata(fileData);
     const imageUri = `https://ipfs.io/ipfs/${imageHash}`;
 
-    // Create and upload metadata
+    // Create metadata and get its IPFS hash
     const metadataHash = await createMetadata(imageUri);
     const tokenUri = `https://ipfs.io/ipfs/${metadataHash}`;
 
-    return res.status(200).json({
+    console.log("Successfully processed upload:", { imageUri, tokenUri });
+
+    // Respond with the IPFS URIs
+    return NextResponse.json({
       success: true,
       imageUri,
       tokenURI: tokenUri,
     });
-
   } catch (error) {
-    console.error('Error processing upload:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Error processing upload',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
+    console.error("Error processing upload:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Error processing upload',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
   }
 }

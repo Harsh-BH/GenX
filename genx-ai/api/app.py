@@ -11,6 +11,8 @@ from inference import generate_image, image_to_text
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from fastapi.responses import JSONResponse
+
+
 from config import HF_MODEL_ID_TTI, HF_TOKEN ,HF_MODEL_ID_ITT
 
 app = FastAPI()
@@ -30,13 +32,16 @@ client = InferenceClient(HF_MODEL_ID_TTI, token=HF_TOKEN)
 
 
 # API Routes
+class ImageRequest(BaseModel):
+    prompt: str
+
 @app.post("/generate-image")
-async def api_generate_image(prompt: str = Form(...)):
-    print("api is called")
+async def api_generate_image(request: ImageRequest):
+    print("API is called")
 
     try:
-        preprocessed_prompt = preprocess_prompt(prompt)
-        print("hello")
+        preprocessed_prompt = preprocess_prompt(request.prompt)
+        print("Processing the prompt...")
         image_path = generate_image(preprocessed_prompt)
         return {"message": "Image generated successfully", "image_path": image_path}
     except Exception as e:

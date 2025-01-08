@@ -10,7 +10,7 @@
 
     <!-- Form for Text-to-Image Generation -->
     <h2>Text-to-Image</h2>
-    <form id="textToImageForm" action="http://localhost:8001/generate-image" method="POST">
+    <form id="textToImageForm" action="http://localhost:8000/generate-image" method="POST">
         <label for="prompt">Enter Prompt:</label><br>
         <textarea id="prompt" name="prompt" rows="4" cols="50" required></textarea><br><br>
         <button type="submit">Generate Image</button>
@@ -20,7 +20,7 @@
 
     <!-- Form for Image-to-Text Conversion -->
     <h2>Image-to-Text</h2>
-    <form id="imageToTextForm" action="http://localhost:8001/image-to-text" method="POST" enctype="multipart/form-data">
+    <form id="imageToTextForm" action="http://localhost:8000/image-to-text" method="POST" enctype="multipart/form-data">
         <label for="image">Upload Image:</label><br>
         <input type="file" id="image" name="image" accept="image/*" required><br><br>
         <button type="submit">Convert to Text</button>
