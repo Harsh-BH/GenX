@@ -14,9 +14,7 @@ const fileToBase64 = (file: File): Promise<string> => {
   });
 };
 
-const uploadToPinata = async (file: File): Promise<string> => {
-  const fileData = await fileToBase64(file);
-
+const uploadToPinata = async (fileData: string): Promise<string> => {
   try {
     const response = await fetch("/api/uploadImage", {
       method: "POST",
@@ -58,6 +56,18 @@ const generateImage = async (description: string): Promise<string> => {
   }
 };
 
+// Function to fetch and convert image to base64
+const getImageAsBase64 = async (imageUrl: string): Promise<string> => {
+  const response = await fetch(imageUrl);
+  const blob = await response.blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
+
 const MintNFT: React.FC = () => {
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -78,7 +88,8 @@ const MintNFT: React.FC = () => {
       try {
         setIsUploading(true);
         setStatus("Uploading image...");
-        const generatedTokenURI = await uploadToPinata(selectedFile);
+        const base64Data = await fileToBase64(selectedFile);
+        const generatedTokenURI = await uploadToPinata(base64Data);
         setTokenURI(generatedTokenURI);
         setStatus("Image uploaded successfully! Ready to mint.");
       } catch (error) {
@@ -97,18 +108,27 @@ const MintNFT: React.FC = () => {
     }
 
     try {
+      // Generate image
       setIsGenerating(true);
       setStatus("Generating image...");
       const generatedImagePath = await generateImage(description);
-      const generatedImageUrl = `http://localhost:8000${generatedImagePath}`;
-      setGeneratedImageUrl(generatedImageUrl);
-      setTokenURI(generatedImageUrl);
-      setStatus("Image generated successfully! Ready to mint.");
+      const fullImageUrl = `http://localhost:8000${generatedImagePath}`;
+      setGeneratedImageUrl(fullImageUrl);
+
+      // Convert generated image to base64 and upload to Pinata
+      setIsUploading(true);
+      setStatus("Uploading generated image to IPFS...");
+      const base64Data = await getImageAsBase64(fullImageUrl);
+      const generatedTokenURI = await uploadToPinata(base64Data);
+      setTokenURI(generatedTokenURI);
+      setStatus("Image generated and uploaded successfully! Ready to mint.");
+
     } catch (error) {
-      console.error("Error generating image:", error);
-      setStatus("Failed to generate image!");
+      console.error("Error in generate and upload process:", error);
+      setStatus("Failed to generate and upload image!");
     } finally {
       setIsGenerating(false);
+      setIsUploading(false);
     }
   };
 
@@ -241,14 +261,11 @@ const MintNFT: React.FC = () => {
         {/* Generated Image Section */}
         <div className="w-1/2 flex justify-center items-center p-6">
           <div className="text-center">
-            {/* Skeleton loader shown when generating image */}
-            {isGenerating ? (
+            {isGenerating || isUploading ? (
               <div className="flex flex-col space-y-3">
                 <Skeleton className="h-[400px] w-[400px] rounded-xl" />
-
               </div>
             ) : (
-              // Display Generated Image after generation
               generatedImageUrl && (
                 <img
                   src={generatedImageUrl}
