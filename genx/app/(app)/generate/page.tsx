@@ -1,9 +1,12 @@
 "use client"
+import { ethers } from 'ethers';
 import { useState } from "react";
 import { mintNFT } from "@/components/web3/nft";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast"
+
 
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -14,27 +17,7 @@ const fileToBase64 = (file: File): Promise<string> => {
   });
 };
 
-const uploadToPinata = async (fileData: string): Promise<string> => {
-  try {
-    const response = await fetch("/api/uploadImage", {
-      method: "POST",
-      body: JSON.stringify({ fileData }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
 
-    if (!response.ok) {
-      throw new Error("Failed to upload image to Pinata.");
-    }
-
-    const data = await response.json();
-    return data.tokenURI;
-  } catch (error) {
-    console.error("Error uploading file:", error);
-    throw new Error("Error uploading to Pinata");
-  }
-};
 
 const generateImage = async (description: string): Promise<string> => {
   try {
@@ -49,6 +32,7 @@ const generateImage = async (description: string): Promise<string> => {
     }
 
     const data = await response.json();
+
     return data.image_path;
   } catch (error) {
     console.error("Error generating image:", error);
@@ -79,6 +63,38 @@ const MintNFT: React.FC = () => {
   const [isMinting, setIsMinting] = useState<boolean>(false);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
+
+  const { toast } = useToast()
+
+  const uploadToPinata = async (fileData: string): Promise<string> => {
+    try {
+      const response = await fetch("/api/uploadImage", {
+        method: "POST",
+        body: JSON.stringify({ fileData }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload image to Pinata.");
+      }
+
+      const data = await response.json();
+      setTokenURI(data.ipfsUrl);
+      setStatus(`Upload successful! Token URI: ${data.ipfsUrl}`);
+      toast({
+        title: "Image Generated",
+        description: "Friday, February 10, 2023 at 5:57 PM",
+      })
+
+
+      return data.ipfsUrl;
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      throw new Error("Error uploading to Pinata");
+    }
+  };
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -132,6 +148,8 @@ const MintNFT: React.FC = () => {
     }
   };
 
+
+
   const handleMint = async (): Promise<void> => {
     if (!window.ethereum) {
       alert("Please install MetaMask to interact with this page.");
@@ -143,18 +161,64 @@ const MintNFT: React.FC = () => {
       return;
     }
 
+    if (!recipient) {
+      alert("Please enter a recipient address!");
+      return;
+    }
+
     try {
       setIsMinting(true);
-      setStatus("Minting in progress...");
+      setStatus("Connecting to wallet...");
+
+      // Request account access
+      await window.ethereum.request({
+        method: 'eth_requestAccounts'
+      });
+
+      setStatus("Starting minting process...");
+
+      // Call the mintNFT function from your imported contract
       await mintNFT(recipient, tokenURI);
-      setStatus("NFT Minted Successfully!");
-    } catch (error) {
+
+      // Update UI state
+      setStatus("NFT Minted Successfully! 🎉");
+      toast({
+        title: "Success!",
+        description: "Your NFT has been minted successfully",
+        duration: 5000,
+      });
+
+      // Optional: Clear form or reset states
+      setDescription("");
+      setGeneratedImageUrl(null);
+
+    } catch (error: any) {
       console.error("Error minting NFT:", error);
-      setStatus("Minting failed!");
+
+      // Handle different types of errors
+      let errorMessage = "Failed to mint NFT";
+
+      if (error.code === 4001) {
+        errorMessage = "Transaction was rejected by user";
+      } else if (error.code === -32603) {
+        errorMessage = "Internal JSON-RPC error. Please check your wallet has sufficient funds.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setStatus(`Minting failed: ${errorMessage}`);
+      toast({
+        title: "Minting Failed",
+        description: errorMessage,
+        variant: "destructive",
+        duration: 5000,
+      });
     } finally {
       setIsMinting(false);
     }
   };
+
+
 
   return (
     <div className="flex justify-center items-start gap-12">
@@ -246,12 +310,15 @@ const MintNFT: React.FC = () => {
               placeholder="Generated Token URI (e.g., IPFS link)"
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             />
+             {tokenURI && (
+              <p className="text-sm text-green-600 mt-1">✓ Token URI successfully generated</p>
+            )}
           </div>
 
           {/* Mint Button */}
           <Button
             onClick={handleMint}
-            disabled={isMinting || isUploading || isGenerating || !tokenURI || !recipient}
+            disabled={isMinting || isUploading || isGenerating}
             className="w-full p-3 rounded-lg font-semibold"
           >
             {isMinting ? "Minting..." : isUploading ? "Uploading..." : "Mint NFT"}

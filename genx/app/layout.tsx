@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { Toaster } from "@/components/ui/toaster"
 
 import '@rainbow-me/rainbowkit/styles.css';
 import { Providers } from './providers';
@@ -33,7 +34,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-   <Providers>{children}</Providers>
+        <Providers>{children}</Providers>
+        <Toaster />
 
 
       </body>
