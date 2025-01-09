@@ -68,13 +68,15 @@ const ExploreNFTs = () => {
         {nfts?.map((nft, index) => (
           <NFTCard key={index} imageUrl={nft.tokenURI} title={nft.name} recipientAddress={nft.recipientAddress}/>
         ))}
-      </main> : <p className="text-white">no nfts</p>}
+      </main> : <main className="text-white font-semibold mt-8 text-4xl">no more nfts</main>}
 
       {/* Pagination */}
-        <Pagination className="mt-4">
-            <PaginationContent>
+
+        <Pagination className="absolute bottom-4 w-full flex items-center justify-center">
+            <PaginationContent className="bg-purple-500 py-4 backdrop-blur-md bg-opacity-15 rounded-lg">
                 <PaginationItem>
                 <PaginationPrevious href="#" onClick={() => {
+                  if(page===1) return
                   setPage((prev) => prev-1)
                 }}/>
                 </PaginationItem>
@@ -99,7 +101,7 @@ const ExploreNFTs = () => {
                 </PaginationItem>
             </PaginationContent>
         </Pagination>
-
+      
     </div>
   );
 };
