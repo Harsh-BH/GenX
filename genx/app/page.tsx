@@ -32,32 +32,32 @@ export default function Home() {
     {
       imageUrl: "https://img.freepik.com/free-photo/abstract-textured-backgound_1258-30633.jpg",
       title: "Cosmic Dreams #001",
-      price: "0.85"
+      recipientAddress: "0.85"
     },
     {
       imageUrl: "https://img.freepik.com/free-photo/abstract-textured-backgound_1258-30633.jpg",
       title: "Cosmic Dreams #001",
-      price: "0.85"
+      recipientAddress: "0.85"
     },
     {
       imageUrl: "https://img.freepik.com/free-photo/abstract-textured-backgound_1258-30633.jpg",
       title: "Cosmic Dreams #001",
-      price: "0.85"
+      recipientAddress: "0.85"
     },
     {
       imageUrl: "https://img.freepik.com/free-photo/abstract-textured-backgound_1258-30633.jpg",
       title: "Cosmic Dreams #001",
-      price: "0.85"
+      recipientAddress: "0.85"
     },
     {
       imageUrl: "https://img.freepik.com/free-photo/abstract-textured-backgound_1258-30633.jpg",
       title: "Cosmic Dreams #001",
-      price: "0.85"
+      recipientAddress: "0.85"
     },
     {
       imageUrl: "https://img.freepik.com/free-photo/abstract-textured-backgound_1258-30633.jpg",
       title: "Cosmic Dreams #001",
-      price: "0.85"
+      recipientAddress: "0.85"
     },
 
 
@@ -151,7 +151,7 @@ export default function Home() {
                               <CardContent className="flex flex-col items-center justify-center p-4">
                                 <img className="rounded-lg w-40 h-40" src={nft.imageUrl} />
                                 <span className="text-md font-semibold mt-2">{nft.title}</span>
-                                <span className="text-xs">{nft.price} ETH</span>
+                                <span className="text-xs">{nft.recipientAddress} ETH</span>
                                 <Button className=" font-semibold w-full mt-3">Check Out</Button>
                               </CardContent>
                             </Card>

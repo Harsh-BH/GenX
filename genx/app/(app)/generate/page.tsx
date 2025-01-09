@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast"
 import { Navbar } from '@/components/Navbar';
 import Loader from '@/components/Loader';
+import axios from 'axios';
 
 
 const fileToBase64 = (file: File): Promise<string> => {
@@ -191,6 +192,24 @@ const MintNFT: React.FC = () => {
       });
 
       setStatus("Starting minting process...");
+
+      //fetch
+      const res = await fetch("/api/mintNft", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name: name,
+          description: description,
+          tokenURI: tokenURI,
+          recipientAddress: recipient,
+        })
+      })
+
+      const data = res.json()
+
+      console.log(data)
 
       // Call the mintNFT function from your imported contract
       await mintNFT(recipient, tokenURI);
