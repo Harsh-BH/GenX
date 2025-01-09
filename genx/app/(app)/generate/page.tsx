@@ -1,11 +1,13 @@
 "use client"
 import { ethers } from 'ethers';
-import { useState } from "react";
+import { useState ,useEffect} from "react";
 import { mintNFT } from "@/components/web3/nft";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast"
+import { Navbar } from '@/components/Navbar';
+import Loader from '@/components/Loader';
 
 
 const fileToBase64 = (file: File): Promise<string> => {
@@ -62,9 +64,22 @@ const MintNFT: React.FC = () => {
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isMinting, setIsMinting] = useState<boolean>(false);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
+  const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>
+    (null);
+    const [showLoader, setShowLoader] = useState(true);
+
 
   const { toast } = useToast()
+  useEffect(() => {
+    // Hide the loader after 2 seconds
+    const timer = setTimeout(() => {
+      setShowLoader(false);
+    }, 2500);
+
+    // Cleanup the timer
+    return () => clearTimeout(timer);
+  }, []);
+
 
   const uploadToPinata = async (fileData: string): Promise<string> => {
     try {
@@ -218,136 +233,291 @@ const MintNFT: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      // Create a small sparkle element
+      const sparkle = document.createElement("div");
+
+      // Customize appearance via Tailwind / inline style
+      sparkle.className = `
+        pointer-events-none
+        absolute
+        rounded-full
+        opacity-800
+        animate-pulse
+        transition-all
+        duration-500
+        ease-out
+      `;
+
+      // Random color from an array
+      const colors = ["bg-pink-500", "bg-yellow-400", "bg-blue-400", "bg-purple-500", "bg-blue-400", "bg-red-400"];
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      sparkle.classList.add(randomColor);
+
+      // Random size between 5px and 15px
+      const size = Math.floor(Math.random() * 10) + 10;
+      sparkle.style.width = `${size}px`;
+      sparkle.style.height = `${size}px`;
+
+      // Position at mouse location
+      sparkle.style.left = `${e.pageX}px`;
+      sparkle.style.top = `${e.pageY}px`;
+      sparkle.style.zIndex = 9999;
+      sparkle.style.transform = "translate(-50%, -50%)";
+
+      document.body.appendChild(sparkle);
+
+      // Fade out and remove
+      setTimeout(() => {
+        sparkle.style.opacity = "0";
+        setTimeout(() => sparkle.remove(), 500);
+      }, 300);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
 
 
   return (
-    <div className="flex justify-center items-start gap-12">
-      {/* Form Container */}
-      <div className="flex justify-center items-center space-x-6 w-full">
-        {/* Form Section */}
-        <div className="max-w-lg p-6 rounded-lg shadow-md w-1/2">
-          <h1 className="text-2xl font-bold text-center mb-6">Mint Your NFT</h1>
+<>
+  {showLoader ? (
+        <Loader />
+      ) : (
+        <>
+    <Navbar/>
+    <div
+    className="
+      relative
+      min-h-screen
+      flex
+      flex-col
+      custom-gradient-bg
+      font-poppins
+      text-white
+    "
+    >
 
-          {/* Name Field */}
-          <div className="mb-4">
-            <label htmlFor="name" className="block text-lg font-semibold text-gray-700">
-              Name
-            </label>
-            <Input
-              type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter NFT name"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
+   <h1
+  className="
+    text-6xl
+    font-extrabold
+    text-center
+    mb-6
+    text-transparent
+    bg-clip-text
+    bg-gradient-to-r
+    from-blue-400
+    via-purple-500
+    to-pink-500
+    animate-fade-in
+    custom-font
+  "
+>
+  Mint Your NFT
+</h1>
 
-          {/* Description Field */}
-          <div className="mb-4">
-            <label htmlFor="description" className="block text-lg font-semibold text-gray-700">
-              Description
-            </label>
-            <Input
-              type="text"
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter NFT description"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
 
-          {/* Generate Image Button */}
-          <Button
-            onClick={handleGenerateImage}
-            disabled={isGenerating || !description}
-            className="w-full p-3 rounded-lg font-semibold mb-4"
+    {/* Form Container */}
+    <div className="flex flex-col md:flex-row justify-center items-center gap-12 w-full p-4">
+      {/* Form Section */}
+      {/* Added glass effect here */}
+      <div className="glass max-w-lg p-8 rounded-lg shadow-md w-full md:w-1/2 animate-slide-in \">
+        {/* Name Field */}
+        <div className="mb-6">
+          <label
+            htmlFor="name"
+            className="block text-lg font-semibold mb-2 text-white"
           >
-            {isGenerating ? "Generating..." : "Generate Image"}
-          </Button>
-
-          {/* Upload Image */}
-          <div className="mb-4">
-            <label htmlFor="tokenURI" className="block text-lg font-semibold text-gray-700">
-              Upload Image
-            </label>
-            <Input
-              type="file"
-              id="picture"
-              accept="image/*"
-              onChange={handleFileChange}
-              disabled={isUploading}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
-
-          {/* Recipient Address */}
-          <div className="mb-4">
-            <label htmlFor="recipient" className="block text-lg font-semibold text-gray-700">
-              Recipient Address
-            </label>
-            <Input
-              type="text"
-              id="recipient"
-              value={recipient}
-              onChange={(e) => setRecipient(e.target.value)}
-              placeholder="Enter recipient address"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
-
-          {/* Token URI */}
-          <div className="mb-4">
-            <label htmlFor="tokenURI" className="block text-lg font-semibold text-gray-700">
-              Token URI
-            </label>
-            <Input
-              type="text"
-              id="tokenURI"
-              value={tokenURI}
-              readOnly
-              placeholder="Generated Token URI (e.g., IPFS link)"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-             {tokenURI && (
-              <p className="text-sm text-green-600 mt-1">✓ Token URI successfully generated</p>
-            )}
-          </div>
-
-          {/* Mint Button */}
-          <Button
-            onClick={handleMint}
-            disabled={isMinting || isUploading || isGenerating}
-            className="w-full p-3 rounded-lg font-semibold"
-          >
-            {isMinting ? "Minting..." : isUploading ? "Uploading..." : "Mint NFT"}
-          </Button>
+            Name
+          </label>
+          <input
+            type="text"
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Enter NFT name"
+            className="
+          w-full p-3 border border-white/20 rounded-lg
+      focus:outline-none focus:ring-2 focus:ring-blue-500
+      bg-white/10 text-white placeholder:text-gray-300
+      shadow-lg backdrop-blur-lg hover:border-white/50
+      transition-all duration-300 ease-in-out cursor-pointer
+      disabled:opacity-50 disabled:cursor-not-allowed
+            "
+          />
         </div>
 
-        {/* Generated Image Section */}
-        <div className="w-1/2 flex justify-center items-center p-6">
-          <div className="text-center">
-            {isGenerating || isUploading ? (
-              <div className="flex flex-col space-y-3">
-                <Skeleton className="h-[400px] w-[400px] rounded-xl" />
-              </div>
-            ) : (
-              generatedImageUrl && (
-                <img
-                  src={generatedImageUrl}
-                  alt="Generated NFT"
-                  className="w-128 h-96 object-cover rounded-lg shadow-lg"
-                />
-              )
-            )}
+        {/* Description Field */}
+        <div className="mb-6">
+          <label
+            htmlFor="description"
+            className="block text-lg font-semibold mb-2 text-white"
+          >
+            Description
+          </label>
+          <input
+            type="text"
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Enter NFT description"
+            className="
+             w-full p-3 border border-white/20 rounded-lg
+      focus:outline-none focus:ring-2 focus:ring-blue-500
+      bg-white/10 text-white placeholder:text-gray-300
+      shadow-lg backdrop-blur-lg hover:border-white/50
+      transition-all duration-300 ease-in-out cursor-pointer
+      disabled:opacity-50 disabled:cursor-not-allowed
+            "
+          />
+        </div>
 
-            {/* Status Message */}
-            {status && <p className="text-center text-lg text-gray-700 mt-4">{status}</p>}
-          </div>
+        {/* Generate Image Button */}
+        <button
+          onClick={handleGenerateImage}
+          disabled={isGenerating || !description}
+          className={`w-full p-3 rounded-lg font-semibold mb-6 transition duration-300 ${
+            isGenerating
+              ? "bg-gray-400 text-gray-800 cursor-not-allowed"
+              : "bg-black text-white hover:bg-gray-800"
+          }`}
+        >
+          {isGenerating ? "Generating..." : "Generate Image"}
+        </button>
+
+        {/* Upload Image */}
+        <div className="mb-6">
+  <label
+    htmlFor="picture"
+    className="block text-lg font-semibold mb-2 text-white"
+  >
+    Upload Image
+  </label>
+  <input
+    type="file"
+    id="picture"
+    accept="image/*"
+    onChange={handleFileChange}
+    disabled={isUploading}
+    className="
+      w-full p-3 border border-white/20 rounded-lg
+      focus:outline-none focus:ring-2 focus:ring-blue-500
+      bg-white/10 text-white placeholder:text-gray-300
+      shadow-lg backdrop-blur-lg hover:border-white/50
+      transition-all duration-300 ease-in-out cursor-pointer
+      disabled:opacity-50 disabled:cursor-not-allowed
+    "
+  />
+
+
+        </div>
+
+        {/* Recipient Address */}
+        <div className="mb-6">
+          <label
+            htmlFor="recipient"
+            className="block text-lg font-semibold mb-2 text-white"
+          >
+            Recipient Address
+          </label>
+          <input
+            type="text"
+            id="recipient"
+            value={recipient}
+            onChange={(e) => setRecipient(e.target.value)}
+            placeholder="Enter recipient address"
+            className="
+            w-full p-3 border border-white/20 rounded-lg
+      focus:outline-none focus:ring-2 focus:ring-blue-500
+      bg-white/10 text-white placeholder:text-gray-300
+      shadow-lg backdrop-blur-lg hover:border-white/50
+      transition-all duration-300 ease-in-out cursor-pointer
+      disabled:opacity-50 disabled:cursor-not-allowed
+            "
+          />
+        </div>
+
+        {/* Token URI */}
+        <div className="mb-6">
+          <label
+            htmlFor="tokenURI"
+            className="block text-lg font-semibold mb-2 text-white"
+          >
+            Token URI
+          </label>
+          <input
+            type="text"
+            id="tokenURI"
+            value={tokenURI}
+            readOnly
+            placeholder="Generated Token URI (e.g., IPFS link)"
+            className="
+             w-full p-3 border border-white/20 rounded-lg
+      focus:outline-none focus:ring-2 focus:ring-blue-500
+      bg-white/10 text-white placeholder:text-gray-300
+      shadow-lg backdrop-blur-lg hover:border-white/50
+      transition-all duration-300 ease-in-out cursor-pointer
+      disabled:opacity-50 disabled:cursor-not-allowed
+            "
+          />
+          {tokenURI && (
+            <p className="text-sm text-blue-600 mt-1">
+              ✓ Token URI successfully generated
+            </p>
+          )}
+        </div>
+
+        {/* Mint Button */}
+        <button
+          onClick={handleMint}
+          disabled={isMinting || isUploading || isGenerating}
+          className={`w-full p-3 rounded-lg font-semibold transition duration-300 ${
+            isMinting || isUploading || isGenerating
+              ? "bg-gray-400 text-gray-800 cursor-not-allowed"
+              : "bg-black text-white hover:bg-gray-800"
+          }`}
+        >
+          {isMinting
+            ? "Minting..."
+            : isUploading
+            ? "Uploading..."
+            : "Mint NFT"}
+        </button>
+      </div>
+
+      {/* Generated Image Section */}
+      <div className="w-full md:w-1/2 flex justify-center items-center p-6">
+        <div className="text-center">
+          {isGenerating || isUploading ? (
+            <div className="flex flex-col space-y-3 animate-pulse">
+              <div className="h-[400px] w-[400px] bg-gray-200 rounded-xl"></div>
+            </div>
+          ) : (
+            generatedImageUrl && (
+              <img
+                src={generatedImageUrl}
+                alt="Generated NFT"
+                className="w-128 h-96 object-cover rounded-lg shadow-lg animate-fade-in"
+              />
+            )
+          )}
+
+          {/* Status Message */}
+          {status && (
+            <p className="text-center text-lg text-white mt-4">{status}</p>
+          )}
         </div>
       </div>
     </div>
+  </div>
+
+    </>
+      )}
+      </>
   );
 };
 

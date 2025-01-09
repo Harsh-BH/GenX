@@ -1,7 +1,9 @@
+"use client"
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
 import { Features } from "@/components/sections/features";
 import { Card, CardContent } from "@/components/ui/card"
+import { useEffect } from "react";
 import {
   Carousel,
   CarouselContent,
@@ -45,14 +47,62 @@ export default function Home() {
       title: "Cosmic Dreams #001",
       price: "0.85"
     },
-    
-    
+
+
   ];
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      // Create a small sparkle element
+      const sparkle = document.createElement("div");
+
+      // Customize appearance via Tailwind / inline style
+      sparkle.className = `
+        pointer-events-none
+        absolute
+        rounded-full
+        opacity-800
+        animate-pulse
+        transition-all
+        duration-500
+        ease-out
+      `;
+
+      // Random color from an array
+      const colors = ["bg-pink-500", "bg-yellow-400", "bg-blue-400", "bg-purple-500", "bg-blue-400", "bg-red-400"];
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      sparkle.classList.add(randomColor);
+
+      // Random size between 5px and 15px
+      const size = Math.floor(Math.random() * 10) + 10;
+      sparkle.style.width = `${size}px`;
+      sparkle.style.height = `${size}px`;
+
+      // Position at mouse location
+      sparkle.style.left = `${e.pageX}px`;
+      sparkle.style.top = `${e.pageY}px`;
+      sparkle.style.zIndex = 9999;
+      sparkle.style.transform = "translate(-50%, -50%)";
+
+      document.body.appendChild(sparkle);
+
+      // Fade out and remove
+      setTimeout(() => {
+        sparkle.style.opacity = "0";
+        setTimeout(() => sparkle.remove(), 500);
+      }, 300);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
       <Navbar />
-      
+
       <section className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
@@ -67,7 +117,7 @@ export default function Home() {
             </Link>
           </div>
 
-         
+
             <div className="w-full flex justify-center items-center">
               <Carousel
                 opts={{
@@ -94,10 +144,10 @@ export default function Home() {
                 <CarouselPrevious />
                 <CarouselNext />
               </Carousel>
-              
-            </div>    
+
+            </div>
           </div>
-    
+
       </section>
 
       {/* Features Section */}

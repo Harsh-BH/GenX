@@ -1,0 +1,97 @@
+/* -------------------------------------
+   styles.css
+   Include custom animations, glassy effects,
+   and other global styles here.
+------------------------------------- */
+
+/*
+  1) Fade-in Animation
+  Apply with: className="animate-fade-in"
+*/
+@keyframes fadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 1s ease-in-out forwards;
+  }
+
+  /*
+    2) Slide-in Animation
+    Apply with: className="animate-slide-in"
+  */
+  @keyframes slideIn {
+    0% {
+      transform: translateX(-50px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-in {
+    animation: slideIn 0.8s ease-in-out forwards;
+  }
+
+  /*
+    3) Glassy Effect
+    Use on containers or placeholders that should have a frosted-glass look.
+    Apply with something like: className="glass"
+  */
+  .glass {
+    background: rgba(255, 255, 255, 0.1); /* Semi-transparent white */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+  }
+
+  /*
+    4) Gradient Background
+    If you want a custom gradient class (instead of using Tailwind's built-ins).
+    Apply with className="custom-gradient-bg"
+  */
+  .custom-gradient-bg {
+    background: linear-gradient(
+      135deg,
+      #2f2f2f 0%,
+      #1a1a1a 50%,
+      #000000 100%
+    );
+  }
+
+  /*
+    5) Animated Text
+    Simple pulsating or color change animation for text.
+    Apply with className="text-pulse"
+  */
+  @keyframes textPulse {
+    0%, 100% {
+      color: #ffffff;
+    }
+    50% {
+      color: #00ff84;
+    }
+  }
+
+  .text-pulse {
+    animation: textPulse 3s ease-in-out infinite;
+  }
+
+  /*
+    6) Placeholder for inputs (Glassy look)
+    If you want the placeholder text itself to have some style:
+  */
+  ::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    font-style: italic;
+  }
