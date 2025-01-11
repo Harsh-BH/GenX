@@ -6,12 +6,12 @@ import { mintNFT } from "@/components/web3/nft";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast"
+import { useToast, ToastAction } from "@/hooks/use-toast"
 import { Navbar } from '@/components/Navbar';
 import Loader from '@/components/Loader';
 import axios from 'axios';
 
-
+// ------- Helper Functions -------
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -21,42 +21,37 @@ const fileToBase64 = (file: File): Promise<string> => {
   });
 };
 
-// API to generate an image from a text description
 const generateImageAPI = async (description: string): Promise<string> => {
   const response = await fetch("http://localhost:8000/generate-image", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ prompt: description }),
   });
-
   if (!response.ok) {
     throw new Error("Failed to generate image.");
   }
-
   const data = await response.json();
-  // The image_path from the backend is relative, so we prepend "http://localhost:8000"
   return `http://localhost:8000${data.image_path}`;
 };
 
-// API to apply a filter to an existing image
-const applyFilterAPI = async (generatedImageUrl: string, filter: string): Promise<string> => {
+const applyFilterAPI = async (
+  generatedImageUrl: string,
+  filter: string
+): Promise<string> => {
   const response = await fetch("http://localhost:8000/apply-filter", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ image_url: generatedImageUrl, filter }),
   });
-
   if (!response.ok) {
     throw new Error("Failed to apply filter.");
   }
-
   const data = await response.json();
-  return data.filtered_image_url; // The new image URL after filter
+  return data.filtered_image_url; // new image URL after filter
 };
 
-// Convert remote image to base64 (for IPFS upload)
-const getImageAsBase64 = async (generatedImageUrl: string): Promise<string> => {
-  const response = await fetch(generatedImageUrl);
+const getImageAsBase64 = async (imageUrl: string): Promise<string> => {
+  const response = await fetch(imageUrl);
   const blob = await response.blob();
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -66,22 +61,20 @@ const getImageAsBase64 = async (generatedImageUrl: string): Promise<string> => {
   });
 };
 
-// Upload the (base64) image to Pinata
 const uploadToPinata = async (fileData: string): Promise<string> => {
   const response = await fetch("/api/uploadImage", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ fileData }),
   });
-
   if (!response.ok) {
     throw new Error("Failed to upload image to Pinata.");
   }
-
   const data = await response.json();
   return data.ipfsUrl;
 };
 
+// ------- Main Component -------
 const MintNFT: React.FC = () => {
   // Form states
   const [name, setName] = useState<string>("");
@@ -89,9 +82,14 @@ const MintNFT: React.FC = () => {
   const [recipient, setRecipient] = useState<string>("");
 
   // Image states
-  const [image, setImage] = useState<File | null>(null); // Local file
+  const [image, setImage] = useState<File | null>(null); // local file
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
-  const [filteredImageUrl, setFilteredImageUrl] = useState<string | null>(null);
+
+  // We’ll store *all versions* of the image (original + filters) in an array
+  // Each entry: { filter: string; url: string }
+  // Then user can pick which to display as main preview
+  const [imagePreviews, setImagePreviews] = useState<{ filter: string; url: string }[]>([]);
+  const [selectedPreviewUrl, setSelectedPreviewUrl] = useState<string>(""); // main NFT preview
 
   // States controlling upload, generate, filter, mint
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -106,10 +104,6 @@ const MintNFT: React.FC = () => {
 
   // Filter selection
   const [selectedFilter, setSelectedFilter] = useState<string>("");
-
-
-  const [isProcessing, setIsProcessing] = useState(false);
-
   const allowedFilters = [
     "sharpen",
     "blur",
@@ -169,7 +163,9 @@ const MintNFT: React.FC = () => {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
+  // -------------------------------------------
   // 1. Handle local file upload (user's own image)
+  // -------------------------------------------
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files || !event.target.files[0]) return;
     const selectedFile = event.target.files[0];
@@ -184,6 +180,10 @@ const MintNFT: React.FC = () => {
       const pinataUrl = await uploadToPinata(base64Data);
       setTokenURI(pinataUrl);
 
+      // Also display as an "original" preview
+      setSelectedPreviewUrl(pinataUrl);
+      setImagePreviews([{ filter: "original", url: pinataUrl }]);
+
       setStatus(`Image uploaded successfully! Token URI: ${pinataUrl}`);
       toast({ title: "Image Uploaded", description: "Your own image is uploaded to IPFS" });
     } catch (error) {
@@ -194,7 +194,9 @@ const MintNFT: React.FC = () => {
     }
   };
 
+  // -------------------------------------------
   // 2. Handle generating an image from the prompt
+  // -------------------------------------------
   const handleGenerateImage = async () => {
     if (!description) {
       return alert("Please enter a description to generate an image.");
@@ -214,6 +216,12 @@ const MintNFT: React.FC = () => {
       setTokenURI(pinataUrl);
 
       setStatus("Image generated and uploaded to IPFS successfully!");
+
+      // Clear old previews, set "original" preview with your AI-generated image
+      const newPreviews = [{ filter: "original", url: pinataUrl }];
+      setImagePreviews(newPreviews);
+      setSelectedPreviewUrl(pinataUrl);
+
     } catch (error) {
       console.error(error);
       setStatus("Failed to generate and upload image!");
@@ -223,41 +231,58 @@ const MintNFT: React.FC = () => {
     }
   };
 
+  // -------------------------------------------
+  // 3. Handle applying a filter
+  // -------------------------------------------
   const handleApplyFilter = async () => {
-    console.log(generatedImageUrl)
     if (!generatedImageUrl || !selectedFilter) {
       toast({
-        variant: "destructive", // Specifies the type of toast, e.g., "error"
+        variant: "destructive",
         title: "Uh oh! Something went wrong.",
-        description: "There was a problem with your request.",
-        action: <ToastAction altText="Try again">Try again</ToastAction>, // Action for retry or other use
+        description: "No generated image or filter found.",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
       });
-
-
       return;
     }
-
     if (!allowedFilters.includes(selectedFilter)) {
       toast({
-        variant: "destructive", // Specifies the type of toast, e.g., "error"
+        variant: "destructive",
         title: "Uh oh! Something went wrong.",
         description: "Invalid Filter selected.",
-        action: <ToastAction altText="Try again">Try again</ToastAction>, // Action for retry or other use
       });
       return;
     }
 
     try {
-      setIsProcessing(true);
+      setIsApplyingFilter(true);
+      setStatus("Applying filter...");
+
       const filteredUrl = await applyFilterAPI(generatedImageUrl, selectedFilter);
-      setFilteredImageUrl(filteredUrl);
+      setStatus("Filter applied successfully!");
+
+      // Convert new filtered image to IPFS link
+      setIsUploading(true);
+      setStatus("Uploading filtered image to IPFS...");
+      const base64Data = await getImageAsBase64(filteredUrl);
+      const pinataUrl = await uploadToPinata(base64Data);
+
+      // Add the new filtered version to our previews
+      setImagePreviews((prev) => [
+        ...prev,
+        { filter: selectedFilter, url: pinataUrl },
+      ]);
+
+      // Optionally set the new filtered as main
+      setSelectedPreviewUrl(pinataUrl);
+      setTokenURI(pinataUrl);
+
       toast({
-
         title: "Success!",
-        description: "Filter applied successfully!",
+        description: "Filter applied and uploaded to IPFS successfully!",
       });
-
     } catch (error: unknown) {
+      console.error(error);
+      setStatus("Failed to apply filter or upload!");
       const errorMessage =
         error instanceof Error ? error.message : "An unexpected error occurred.";
       toast({
@@ -265,15 +290,15 @@ const MintNFT: React.FC = () => {
         title: "Error",
         description: errorMessage,
       });
-
-
-
     } finally {
-      setIsProcessing(false);
+      setIsApplyingFilter(false);
+      setIsUploading(false);
     }
   };
 
+  // -------------------------------------------
   // 4. Handle NFT Minting
+  // -------------------------------------------
   const handleMint = async () => {
     if (!window.ethereum) {
       return alert("Please install MetaMask to interact with this page.");
@@ -295,7 +320,7 @@ const MintNFT: React.FC = () => {
 
       setStatus("Starting minting process...");
 
-      //fetch
+      // Example: call your /api/mintNft route
       const res = await fetch("/api/mintNft", {
         method: "POST",
         headers: {
@@ -307,13 +332,11 @@ const MintNFT: React.FC = () => {
           tokenURI: tokenURI,
           recipientAddress: recipient,
         })
-      })
+      });
+      const data = await res.json();
+      console.log("MintNft Endpoint response:", data);
 
-      const data = res.json()
-
-      console.log(data)
-
-      // Call the mintNFT function from your imported contract
+      // Or optionally call a local contract method
       await mintNFT(recipient, tokenURI);
 
       setStatus("NFT Minted Successfully! 🎉");
@@ -340,7 +363,9 @@ const MintNFT: React.FC = () => {
     }
   };
 
-  // ** Render **
+  // -------------------------------------------
+  // 5. Render
+  // -------------------------------------------
   return (
     <>
       {showLoader ? (
@@ -360,7 +385,10 @@ const MintNFT: React.FC = () => {
               <div className="glass max-w-lg p-8 rounded-lg shadow-md w-full md:w-1/2 animate-slide-in">
                 {/* NFT Name */}
                 <div className="mb-6">
-                  <label htmlFor="name" className="block text-lg font-semibold mb-2 text-white">
+                  <label
+                    htmlFor="name"
+                    className="block text-lg font-semibold mb-2 text-white"
+                  >
                     Name
                   </label>
                   <input
@@ -375,7 +403,10 @@ const MintNFT: React.FC = () => {
 
                 {/* Description */}
                 <div className="mb-6">
-                  <label htmlFor="description" className="block text-lg font-semibold mb-2 text-white">
+                  <label
+                    htmlFor="description"
+                    className="block text-lg font-semibold mb-2 text-white"
+                  >
                     Description
                   </label>
                   <input
@@ -403,7 +434,10 @@ const MintNFT: React.FC = () => {
 
                 {/* Upload Your Own Image */}
                 <div className="mb-6">
-                  <label htmlFor="picture" className="block text-lg font-semibold mb-2 text-white">
+                  <label
+                    htmlFor="picture"
+                    className="block text-lg font-semibold mb-2 text-white"
+                  >
                     Upload Image
                   </label>
                   <input
@@ -419,7 +453,10 @@ const MintNFT: React.FC = () => {
                 {/* Filter Selection (Only if we have a generated image) */}
                 {generatedImageUrl && (
                   <div className="mb-6">
-                    <label htmlFor="filter" className="block text-lg font-semibold mb-2 text-white">
+                    <label
+                      htmlFor="filter"
+                      className="block text-lg font-semibold mb-2 text-white"
+                    >
                       Apply Filter
                     </label>
                     <select
@@ -428,9 +465,8 @@ const MintNFT: React.FC = () => {
                       onChange={(e) => setSelectedFilter(e.target.value)}
                       className="w-full p-3 border border-white/20 rounded-lg bg-white/10 text-white placeholder:text-gray-300 shadow-lg"
                     >
-                        <option value="">Select Filter</option>
-                        <option value="enhance_resolution">Enhance Resolution</option>
-
+                      <option value="">Select Filter</option>
+                      <option value="enhance_resolution">Enhance Resolution</option>
                       <option value="sharpen">Sharpen</option>
                       <option value="blur">Blur</option>
                       <option value="contour">Contour</option>
@@ -456,7 +492,10 @@ const MintNFT: React.FC = () => {
 
                 {/* Recipient Address */}
                 <div className="mb-6">
-                  <label htmlFor="recipient" className="block text-lg font-semibold mb-2 text-white">
+                  <label
+                    htmlFor="recipient"
+                    className="block text-lg font-semibold mb-2 text-white"
+                  >
                     Recipient Address
                   </label>
                   <input
@@ -471,7 +510,10 @@ const MintNFT: React.FC = () => {
 
                 {/* Token URI */}
                 <div className="mb-6">
-                  <label htmlFor="tokenURI" className="block text-lg font-semibold mb-2 text-white">
+                  <label
+                    htmlFor="tokenURI"
+                    className="block text-lg font-semibold mb-2 text-white"
+                  >
                     Token URI
                   </label>
                   <input
@@ -501,44 +543,72 @@ const MintNFT: React.FC = () => {
                 >
                   {isMinting ? "Minting..." : "Mint NFT"}
                 </button>
+
+                {/* Status Message */}
+                {status && (
+                  <p className="mt-4 text-center text-lg text-white">{status}</p>
+                )}
               </div>
 
-              {/* Generated/Filtered Image Section (Right) */}
-              <div className="w-full md:w-1/2 flex justify-center items-center p-6">
+              {/* Right Column: Previews */}
+              <div className="w-full md:w-1/2 flex flex-col items-center p-6 space-y-6">
+                {/* MAIN PREVIEW */}
                 <div className="text-center">
-                  {/* Loading State */}
                   {isGenerating || isUploading || isApplyingFilter ? (
-                    <div className="flex flex-col space-y-3 animate-pulse">
-                      <div
-                        className="
-                          h-[400px] w-[400px]
-                          bg-gray-600
-                          rounded-xl
-                          relative
-                          overflow-hidden
-                          border-4
-                          border-gray-400
-                          shadow-lg
-                        "
-                      >
-                        {/* Lightning Border Effect */}
-                        <div className="absolute inset-0 animate-lightning-border pointer-events-none"></div>
-                      </div>
-                    </div>
+                    // Loading State for the big preview
+                    <div
+                      className="
+                        w-[400px]
+                        h-[400px]
+                        bg-gray-600
+                        rounded-xl
+                        relative
+                        overflow-hidden
+                        border-4
+                        border-gray-400
+                        shadow-lg
+                        animate-pulse
+                      "
+                    />
+                  ) : selectedPreviewUrl ? (
+                    <img
+                      src={selectedPreviewUrl}
+                      alt="Selected NFT"
+                      className="w-[400px] h-[400px] object-cover rounded-lg shadow-lg animate-fade-in"
+                    />
                   ) : (
-                    // Display filtered image if present, else generated image
-                    (filteredImageUrl || generatedImageUrl) && (
-                      <img
-                        src={filteredImageUrl || generatedImageUrl}
-                        alt="Generated NFT"
-                        className="w-128 h-96 object-cover rounded-lg shadow-lg animate-fade-in"
-                      />
-                    )
+                    <div className="text-gray-400">No image selected yet.</div>
                   )}
-
-                  {/* Status Message */}
-                  {status && <p className="text-center text-lg text-white mt-4">{status}</p>}
                 </div>
+
+                {/* GALLERY of ALL PREVIEWS */}
+                {imagePreviews.length > 0 && (
+                  <div className="w-full flex flex-wrap gap-4 justify-center">
+                    {imagePreviews.map(({ filter, url }, idx) => (
+                      <div key={idx} className="flex flex-col items-center">
+                        <img
+                          src={url}
+                          alt={`Preview-${filter}`}
+                          className="w-24 h-24 object-cover rounded-lg shadow cursor-pointer hover:scale-105 transition-all"
+                          onClick={() => {
+                            setSelectedPreviewUrl(url);
+                            setTokenURI(url); // So user chooses it as the final minted image
+                          }}
+                        />
+                        <span className="text-sm mt-2">{filter}</span>
+                        <button
+                          className="mt-1 text-xs bg-blue-600 px-2 py-1 rounded hover:bg-blue-700"
+                          onClick={() => {
+                            setSelectedPreviewUrl(url);
+                            setTokenURI(url);
+                          }}
+                        >
+                          Use as Main
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>

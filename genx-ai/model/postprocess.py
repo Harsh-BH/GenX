@@ -19,7 +19,17 @@ FILTER_MAP = {
 }
 
 # Function to enhance resolution using RealESRGAN
-def enhance_resolution(image, model_weights="weights/RealESRGAN_x4.pth", scale=4):
+import os
+import torch
+
+def enhance_resolution(image, model_weights="weights/models--sberbank-ai--Real-ESRGAN/snapshots/8110204ebf8d25c031b66c26c2d1098aa831157e/RealESRGAN_x4.pth", scale=4):
+    # Build the absolute path to the weights file
+    model_weights = os.path.join(os.path.dirname(__file__), model_weights)
+
+    # Check if the weights file exists
+    if not os.path.exists(model_weights):
+        raise FileNotFoundError(f"Weights file not found: {model_weights}")
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = RealESRGAN(device, scale=scale)
     model.load_weights(model_weights, download=True)
