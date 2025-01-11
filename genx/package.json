@@ -9,11 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@quicknode/sdk": "^2.4.0",
     "@radix-ui/react-label": "^2.1.1",
     "@radix-ui/react-scroll-area": "^1.2.2",
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-toast": "^1.2.4",
     "@rainbow-me/rainbowkit": "^2.2.1",
+    "@react-three/fiber": "^8.17.12",
     "@tanstack/react-query": "^5.62.11",
     "@types/mongoose": "^5.11.97",
     "@types/mongoose-aggregate-paginate-v2": "^1.0.12",
@@ -34,6 +36,7 @@
     "recharts": "^2.15.0",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "three": "^0.172.0",
     "viem": "2.x",
     "wagmi": "^2.14.6"
   },
