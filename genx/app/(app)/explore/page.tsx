@@ -18,121 +18,93 @@ import Loader from "@/components/Loader";
 
 
 
+interface NFT {
+  name: string;
+  tokenURI: string;
+  description: string;
+  recipientAddress: string;
+}
+
 const ExploreNFTs = () => {
-  const [showLoader, setShowLoader] = useState(true);
-
-  const [nfts, setNfts] = useState([
-    {
-      id: 1,
-      imageUrl: "https://via.placeholder.com/300",
-      title: "Cosmic Dreams #001",
-      price: "0.85 ETH",
-    },
-    {
-      id: 2,
-      imageUrl: "https://via.placeholder.com/300",
-      title: "Ethereal Visions #024",
-      price: "1.2 ETH",
-    },
-    {
-      id: 3,
-      imageUrl: "https://via.placeholder.com/300",
-      title: "Neon Vibes #101",
-      price: "0.5 ETH",
-    },
-
-  ]);
+  const [nfts, setNfts] = useState<NFT[]>([]);
 
   const [page, setPage] = useState(1)
 
-  const fetchNFTs = async() => {
-    const response = await axios.get("/api/getNfts")
+  const fetchNFTs = async(page : number) => {
+    const response = await fetch("/api/getNfts",{
+      method: "POST",
+      headers:{
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        page: page,
+        limit: 2
+      })
+    })
+
+    const data = await response.json()
+
+    console.log(data)
+
+    return data
 
   }
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowLoader(false);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
+  const setNFTS = async(page : number) => {
+    const res = await fetchNFTs(page)
+    const newNFTs = res.data.data
+    setNfts(newNFTs)
+  }
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const sparkle = document.createElement("div");
-      sparkle.className = `
-        pointer-events-none
-        absolute
-        rounded-full
-        opacity-800
-        animate-pulse
-        transition-all
-        duration-500
-        ease-out
-      `;
-      const colors = ["bg-pink-500", "bg-yellow-400", "bg-blue-400", "bg-purple-500", "bg-red-400"];
-      const randomColor = colors[Math.floor(Math.random() * colors.length)];
-      sparkle.classList.add(randomColor);
-
-      const size = Math.floor(Math.random() * 10) + 10;
-      sparkle.style.width = `${size}px`;
-      sparkle.style.height = `${size}px`;
-      sparkle.style.left = `${e.pageX}px`;
-      sparkle.style.top = `${e.pageY}px`;
-      sparkle.style.zIndex = "9999";
-      sparkle.style.transform = "translate(-50%, -50%)";
-
-      document.body.appendChild(sparkle);
-      setTimeout(() => {
-        sparkle.style.opacity = "0";
-        setTimeout(() => sparkle.remove(), 500);
-      }, 300);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
-
+    setNFTS(page)
+  },[page])
 
   return (
-    <>
-      {showLoader ? (
-        <Loader />
-      ) : (
-        <>
-          <div className="min-h-screen ">
-            <Navbar />
-            {/* NFT Grid */}
-            <main className="mx-auto px-4 mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {nfts.map((nft) => (
-                <NFTCard imageUrl={nft.imageUrl} title={nft.title} price={nft.price} />
-              ))}
-            </main>
+    <div className="min-h-screen ">
+      <Navbar/>
 
-            {/* Pagination */}
-            <Pagination className="mt-4">
-              <PaginationContent>
+
+      {/* NFT Grid */}
+      {nfts ? <main className="mx-auto px-4 mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {nfts?.map((nft, index) => (
+          <NFTCard key={index} imageUrl={nft.tokenURI} title={nft.name} recipientAddress={nft.recipientAddress}/>
+        ))}
+      </main> : <main className="text-white font-semibold mt-8 text-4xl">no more nfts</main>}
+
+      {/* Pagination */}
+
+        <Pagination className="absolute bottom-4 w-full flex items-center justify-center">
+            <PaginationContent className="bg-purple-500 py-4 backdrop-blur-md bg-opacity-15 rounded-lg">
                 <PaginationItem>
-                  <PaginationPrevious href="#" />
+                <PaginationPrevious href="#" onClick={() => {
+                  if(page===1) return
+                  setPage((prev) => prev-1)
+                }}/>
                 </PaginationItem>
                 <PaginationItem>
-                  <PaginationLink href="#">1</PaginationLink>
-                  <PaginationLink href="#">2</PaginationLink>
-                  <PaginationLink href="#">3</PaginationLink>
+                <PaginationLink href="#" onClick={() => {
+                  setPage(1)
+                }}>1</PaginationLink>
+                <PaginationLink href="#" onClick={() => {
+                  setPage(2)
+                }}>2</PaginationLink>
+                <PaginationLink href="#" onClick={() => {
+                  setPage(3)
+                }}>3</PaginationLink>
                 </PaginationItem>
                 <PaginationItem>
                   <PaginationEllipsis />
                 </PaginationItem>
                 <PaginationItem>
-                  <PaginationNext href="#" />
+                <PaginationNext href="#" onClick={() => {
+                  setPage((prev) => prev+1)
+                }}/>
                 </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+            </PaginationContent>
+        </Pagination>
 
-          </div>
-        </>
-      )}
-      </>
+    </div>
   );
 };
 

@@ -3,13 +3,15 @@
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { mintNFT } from "@/components/web3/nft";
-import { Navbar } from "@/components/Navbar";
-import Loader from "@/components/Loader";
-import { useToast } from "@/hooks/use-toast";
-import { ToastAction } from "@/components/ui/toast"
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast"
+import { Navbar } from '@/components/Navbar';
+import Loader from '@/components/Loader';
+import axios from 'axios';
 
 
-// Helper: Convert file to Base64
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -285,9 +287,33 @@ const MintNFT: React.FC = () => {
     try {
       setIsMinting(true);
       setStatus("Connecting to wallet...");
-      await window.ethereum.request({ method: "eth_requestAccounts" });
 
-      setStatus("Minting your NFT...");
+      // Request account access
+      await window.ethereum.request({
+        method: 'eth_requestAccounts'
+      });
+
+      setStatus("Starting minting process...");
+
+      //fetch
+      const res = await fetch("/api/mintNft", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name: name,
+          description: description,
+          tokenURI: tokenURI,
+          recipientAddress: recipient,
+        })
+      })
+
+      const data = res.json()
+
+      console.log(data)
+
+      // Call the mintNFT function from your imported contract
       await mintNFT(recipient, tokenURI);
 
       setStatus("NFT Minted Successfully! 🎉");
