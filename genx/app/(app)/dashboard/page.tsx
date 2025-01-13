@@ -20,25 +20,27 @@ import { useAccount, useBalance } from "wagmi";
 import { Navbar } from "@/components/Navbar";
 import { fetchNFTs } from "../../api/fetchNFTs";
 import Loader from "@/components/Loader";
+import { format } from "date-fns";
 
-const chartData = [
-  { month: "January", revenue: 1500 },
-  { month: "February", revenue: 2400 },
-  { month: "March", revenue: 1800 },
-  { month: "April", revenue: 3000 },
-  { month: "May", revenue: 2200 },
-  { month: "June", revenue: 2700 },
-];
+// const chartData = [
+//   { month: "January", revenue: 1500 },
+//   { month: "February", revenue: 2400 },
+//   { month: "March", revenue: 1800 },
+//   { month: "April", revenue: 3000 },
+//   { month: "May", revenue: 2200 },
+//   { month: "June", revenue: 2700 },
+// ];
 
-// Chart configuration for revenue
-const chartConfig = {
-  revenue: {
-    label: "Revenue",
-    color: "hsl(340, 80%, 60%)",
-  },
-} satisfies ChartConfig;
+// // Chart configuration for revenue
+// const chartConfig = {
+//   revenue: {
+//     label: "Revenue",
+//     color: "hsl(340, 80%, 60%)",
+//   },
+// } satisfies ChartConfig;
 
 const Dashboard = () => {
+  const [chartData, setChartData] = useState([]);
   const { address } = useAccount(); // Fetch connected wallet address from RainbowKit
   const { data: balance, isError, isLoading } = useBalance({
     address: address, // Use the connected wallet address
@@ -48,6 +50,7 @@ const Dashboard = () => {
   const [loadingNFTs, setLoadingNFTs] = useState(false); // Loading state for NFTs
   const [showLoader, setShowLoader] = useState(true);
   const [myNfts, setMyNfts] = useState([])
+  const [graphNfts, setGraphNfts] = useState([])
 
   function formatTimestamp(timestamp : any) {
     const date = new Date(timestamp);
@@ -111,6 +114,7 @@ const Dashboard = () => {
         createdAt: formatTimestamp(nft.createdAt),
       }));
       setMyNfts(modifiedNfts);
+      setGraphNfts(res.data)
     } else {
       setMyNfts(res.message);
     }
@@ -167,6 +171,35 @@ const Dashboard = () => {
     }, 2000);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (myNfts.length > 0) {
+      const months = Array(12).fill(0); // Initialize counts for all 12 months
+  
+      graphNfts.forEach((nft : any) => {
+        if (nft.createdAt) {
+          const date = new Date(nft.createdAt); // Parse createdAt to a Date object
+          const month = date.getMonth(); // Get the month (0 = January, 11 = December)
+          months[month]++; // Increment count for the corresponding month
+        }
+      });
+  
+      const updatedChartData = months.map((count, index) => ({
+        month: format(new Date(2023, index, 1), "MMMM"), // Format month name
+        count, // NFTs minted in this month
+      }));
+  
+      setChartData(updatedChartData);
+    }
+  }, [graphNfts]);
+  
+
+  const chartConfig = {
+    mintedNFTs: {
+      label: "NFTs Minted",
+      color: "hsl(200, 80%, 60%)",
+    },
+  };
 
   return (
     <>
@@ -262,9 +295,9 @@ const Dashboard = () => {
 
               <Card className="w-[50%]">
                 <CardHeader>
-                  <CardTitle>Revenue Generated</CardTitle>
+                  <CardTitle>NFTs Minted</CardTitle>
                   <CardDescription>
-                    Total revenue generated in the last 6 months
+                    NFTs minted throughout the year
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -290,15 +323,15 @@ const Dashboard = () => {
                       <YAxis
                         tickLine={false}
                         axisLine={false}
-                        tickFormatter={(value) => `$${value}`}
+                        tickFormatter={(value) => `${value}`}
                       />
                       <Tooltip content={<ChartTooltipContent indicator="dot" />} />
                       <Area
-                        dataKey="revenue"
+                        dataKey="count"
                         type="natural"
-                        fill="hsl(260, 80%, 70%)"
+                        fill="hsl(200, 80%, 60%)"
                         fillOpacity={0.3}
-                        stroke="hsl(260, 80%, 70%)"
+                        stroke="hsl(200, 80%, 60%)"
                       />
                     </AreaChart>
                   </ChartContainer>
