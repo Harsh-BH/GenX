@@ -95,3 +95,42 @@
     color: rgba(255, 255, 255, 0.6);
     font-style: italic;
   }
+
+  @keyframes lightning-border {
+    0% {
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 0 5px rgba(0, 255, 255, 0.5), 0 0 10px rgba(0, 255, 255, 0.3);
+    }
+    50% {
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.8), 0 0 20px rgba(0, 255, 255, 0.5);
+    }
+    100% {
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 0 5px rgba(0, 255, 255, 0.5), 0 0 10px rgba(0, 255, 255, 0.3);
+    }
+  }
+  
+  .animate-lightning-border {
+    animation: lightning-border 1.5s infinite ease-in-out;
+    border-radius: 1rem;
+    background: transparent;
+  }
+
+  @keyframes glowAndScale {
+    0%, 100% {
+      text-shadow: 0 0 10px #f472b6, 0 0 20px #f472b6, 0 0 30px #f472b6, 0 0 40px #f472b6;
+      transform: scale(1);
+    }
+    50% {
+      text-shadow: 0 0 15px #f472b6, 0 0 30px #f472b6, 0 0 45px #f472b6, 0 0 60px #f472b6;
+      transform: scale(1.05);
+    }
+  }
+  
+  .glow-text {
+    color: #f472b6; /* pink-600 */
+    animation: glowAndScale 2s infinite;
+    display: inline-block; /* Ensure animations like scaling apply smoothly */
+  }
+  

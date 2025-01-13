@@ -47,12 +47,35 @@ const Dashboard = () => {
   const [nftCount, setNftCount] = useState(0); // State for total NFTs owned
   const [loadingNFTs, setLoadingNFTs] = useState(false); // Loading state for NFTs
   const [showLoader, setShowLoader] = useState(true);
+  const [myNfts, setMyNfts] = useState([])
+
+  function formatTimestamp(timestamp : any) {
+    const date = new Date(timestamp);
+  
+    // Extract day, month, and year
+    const day = date.getDate();
+    const month = date.toLocaleString('default', { month: 'long' });
+    const year = date.getFullYear();
+  
+    // Determine the ordinal suffix for the day
+    const suffix = (day : any) => {
+      if (day % 10 === 1 && day !== 11) return 'st';
+      if (day % 10 === 2 && day !== 12) return 'nd';
+      if (day % 10 === 3 && day !== 13) return 'rd';
+      return 'th';
+    };
+  
+    return `${day}${suffix(day)} ${month} ${year}`;
+  }
+   
+
 
   useEffect(() => {
     if (address) {
       fetchUserNFTs(address);
+      getMyNfts()
     }
-  }, [address]);
+  }, []);
 
   const fetchUserNFTs = async (wallet: string) => {
     setLoadingNFTs(true);
@@ -67,6 +90,29 @@ const Dashboard = () => {
       console.error("Error fetching NFTs:", error);
     } finally {
       setLoadingNFTs(false);
+    }
+  };
+
+  const getMyNfts = async () => {
+    const response = await fetch("/api/getMyNfts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ walletAddress: address }),
+    });
+  
+    const res = await response.json();
+    console.log(res);
+  
+    if (res.success) {
+      const modifiedNfts = res.data.map((nft) => ({
+        ...nft,
+        createdAt: formatTimestamp(nft.createdAt),
+      }));
+      setMyNfts(modifiedNfts);
+    } else {
+      setMyNfts(res.message);
     }
   };
 
@@ -197,8 +243,21 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="flex mt-2 gap-2">
-              <ScrollArea className="h-[65vh] w-[50%] bg-white bg-opacity-5 rounded-xl p-2">
-                {/* Add logic to display individual NFTs if needed */}
+              <ScrollArea className="h-[65vh] w-[50%] bg-white bg-opacity-5 p-2 rounded-xl border">
+                <div className="text-white font-bold">NFTS Minted:</div>
+              {
+                myNfts?.map((nft : any) => (
+                  <div className="w-full h-20 bg-white/10 mt-1 rounded-xl p-2 flex">
+                    <div className="flex gap-2 flex-grow">
+                      <img className="h-full w-16 bg-white rounded-sm" src={nft.tokenURI}/>
+                      <div className="font-semibold text-md flex flex-col h-full gap-1">
+                        <div className="flex gap-1">Name: <div className="font-normal">{nft.name}</div></div>
+                        <div className="gap-1 flex">Minted at: <div className="font-normal">{nft.createdAt}</div></div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              }
               </ScrollArea>
 
               <Card className="w-[50%]">

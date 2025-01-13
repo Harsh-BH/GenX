@@ -52,7 +52,7 @@ const ExploreNFTs = () => {
 
   const setNFTS = async(page : number) => {
     const res = await fetchNFTs(page)
-    const newNFTs = res.data.data
+    const newNFTs = res.data?.data || ""
     setNfts(newNFTs)
   }
 

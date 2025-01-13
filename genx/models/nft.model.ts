@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { ObjectId, Schema } from "mongoose";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 export interface NFT {
@@ -6,6 +6,7 @@ export interface NFT {
     description: string;
     recipientAddress: string;
     tokenURI: string;
+    mintedBy: string;
 }
 
 const nftSchema: Schema<NFT> = new Schema({
@@ -22,6 +23,10 @@ const nftSchema: Schema<NFT> = new Schema({
         required: true
     },
     tokenURI: {
+        type: String,
+        required: true
+    },
+    mintedBy: {
         type: String,
         required: true
     }

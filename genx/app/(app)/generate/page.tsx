@@ -10,6 +10,8 @@ import { useToast, ToastAction } from "@/hooks/use-toast"
 import { Navbar } from '@/components/Navbar';
 import Loader from '@/components/Loader';
 import axios from 'axios';
+import { useAccount } from "wagmi";
+import { userModel } from "@/models/user.model";
 
 // ------- Helper Functions -------
 const fileToBase64 = (file: File): Promise<string> => {
@@ -76,6 +78,7 @@ const uploadToPinata = async (fileData: string): Promise<string> => {
 
 // ------- Main Component -------
 const MintNFT: React.FC = () => {
+  const { address } = useAccount();
   // Form states
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -128,6 +131,7 @@ const MintNFT: React.FC = () => {
 
   // Sparkle effect on mouse move
   useEffect(() => {
+    
     const handleMouseMove = (e: MouseEvent) => {
       const sparkle = document.createElement("div");
       sparkle.className = `
@@ -320,6 +324,7 @@ const MintNFT: React.FC = () => {
 
       setStatus("Starting minting process...");
 
+
       // Example: call your /api/mintNft route
       const res = await fetch("/api/mintNft", {
         method: "POST",
@@ -331,6 +336,7 @@ const MintNFT: React.FC = () => {
           description: description,
           tokenURI: tokenURI,
           recipientAddress: recipient,
+          mintedBy: address,
         })
       });
       const data = await res.json();
@@ -373,9 +379,28 @@ const MintNFT: React.FC = () => {
       ) : (
         <>
           <Navbar />
-          <div className="relative min-h-screen flex flex-col custom-gradient-bg font-poppins text-white">
+          <div className="relative min-h-screen flex flex-col bg-black  text-white">
             {/* Page Title */}
-            <h1 className="text-6xl font-extrabold text-center mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-fade-in custom-font">
+            <h1 className=" 
+            
+                            mt-6        
+                            text-center
+                            text-4xl
+                            font-extrabold
+                            mb-6
+                            bg-gradient-to-r
+                            from-purple-600
+                            to-pink-600
+                            bg-clip-text
+                            text-transparent
+                            
+                            hover:scale-105
+                            transition-transform
+                            duration-300
+                            animate-fade-in
+                            glow-text
+                            
+                            ">
               Mint Your NFT
             </h1>
 

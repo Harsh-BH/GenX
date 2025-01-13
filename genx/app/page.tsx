@@ -225,7 +225,7 @@ export default function Home() {
 
                   {/* LEFT SIDE: Text, Headings, and Carousel */}
                   <div className="md:w-[55%] w-full">
-                    <div className="text-center mb-16 relative">
+                    <div className="text-center mb-16 ml-20 relative">
                       <div className="fadeInUp">
                         <h1
                           className="
@@ -291,7 +291,7 @@ export default function Home() {
                         opts={{
                           align: "start",
                         }}
-                        className="w-full max-w-2xl"
+                        className="w-full max-w-2xl ml-20"
                       >
                         <CarouselContent>
                           {featuredNFTs.map((nft, index) => (
