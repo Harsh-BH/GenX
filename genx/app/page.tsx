@@ -22,6 +22,7 @@ const Ship = dynamic(() => import("@/model/Ship"), {
 });
 
 export default function Home() {
+  const [latestNfts, setLatestNfts] = useState([])
   const [showLoader, setShowLoader] = useState(true);
 
   // ---- Background Random Shapes State ----
@@ -34,8 +35,26 @@ export default function Home() {
     const timer = setTimeout(() => {
       setShowLoader(false);
     }, 2500);
+    fetchLatestNfts()
     return () => clearTimeout(timer);
   }, []);
+
+  const fetchLatestNfts = async() => {
+    const response = await fetch("/api/getLatestNfts", 
+      {
+        method: "GET",
+      }
+    )
+
+    const res = await response.json()
+    console.log(res)
+    if(res.success){
+      setLatestNfts(res.data)
+    }
+    else{
+      return
+    }
+  }
 
   // Generate random positions for background SVG shapes
   useEffect(() => {
@@ -287,14 +306,17 @@ export default function Home() {
 
                     {/* Carousel of featured NFTs */}
                     <div className="w-full flex justify-center items-center">
-                      <Carousel
-                        opts={{
-                          align: "start",
-                        }}
-                        className="w-full max-w-2xl ml-20"
-                      >
-                        <CarouselContent>
-                          {featuredNFTs.map((nft, index) => (
+                    <Carousel
+                      opts={{
+                        align: "start",
+                        slidesToScroll: 1, // Number of slides to scroll per navigation
+                        
+                      }}
+                      className="w-full max-w-2xl ml-20"
+                    >
+                      <CarouselContent>
+                        {(latestNfts && latestNfts.length > 0 ? latestNfts : featuredNFTs).map(
+                          (nft, index) => (
                             <CarouselItem
                               key={index}
                               className="md:basis-1/2 lg:basis-1/3"
@@ -304,15 +326,18 @@ export default function Home() {
                                   <CardContent className="flex flex-col items-center justify-center p-4">
                                     <img
                                       className="rounded-lg w-40 h-40"
-                                      src={nft.imageUrl}
-                                      alt={nft.title}
+                                      src={nft.tokenURI || nft.imageUrl}
+                                      alt={nft.name || nft.title}
                                     />
                                     <span className="text-md font-semibold mt-3">
-                                      {nft.title}
+                                      {nft.name || nft.title}
                                     </span>
-                                    <span className="text-xs text-muted-foreground">
-                                      {nft.price} ETH
-                                    </span>
+                                    {/* Render price only for latestNFTs */}
+                                    {latestNfts && latestNfts.length > 0 && (
+                                      <span className="text-xs text-muted-foreground">
+                                        {nft.price} ETH
+                                      </span>
+                                    )}
                                     <Button className="font-semibold w-full mt-3 hover:scale-105 transition-transform">
                                       Check Out
                                     </Button>
@@ -320,11 +345,13 @@ export default function Home() {
                                 </Card>
                               </div>
                             </CarouselItem>
-                          ))}
-                        </CarouselContent>
-                        <CarouselPrevious />
-                        <CarouselNext />
-                      </Carousel>
+                          )
+                        )}
+                      </CarouselContent>
+                      <CarouselPrevious />
+                      <CarouselNext />
+                    </Carousel>
+
                     </div>
                   </div>
 
